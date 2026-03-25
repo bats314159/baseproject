@@ -1,0 +1,19 @@
+.clock {
+  font-family: 'Digital', sans-serif;
+  font-size: 48px;
+  color: #00FF00;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.digital-clock {
+  background-color: black;
+  padding: 20px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+#date {
+  font-size: 24px;
+  color: white;
+}
