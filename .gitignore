@@ -1,0 +1,31 @@
+# Exclude common development files
+
+# Logs
+*.log
+
+# Node.js
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Java
+*.class
+
+# macOS
+.DS_Store
+
+# IDE files
+.idea/
+.vscode/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# Other common files
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
