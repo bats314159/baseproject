@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Clock</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .clock { font-size: 40px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="clock">
+        <div id="clock-utc">UTC Time: <span id="time-utc"></span></div>
+        <div id="clock-est">EST Time: <span id="time-est"></span></div>
+        <div id="clock-pst">PST Time: <span id="time-pst"></span></div>
+    </div>
+    <script>
+        function updateClocks() {
+            const utcDate = new Date();
+            const estDate = new Date(utcDate.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+            const pstDate = new Date(utcDate.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+            document.getElementById('time-utc').innerText = utcDate.toISOString().slice(0, 19).replace('T', ' ');
+            document.getElementById('time-est').innerText = estDate.toISOString().slice(0, 19).replace('T', ' ');
+            document.getElementById('time-pst').innerText = pstDate.toISOString().slice(0, 19).replace('T', ' ');
+        }
+        setInterval(updateClocks, 1000);
+        updateClocks();
+    </script>
+</body>
+</html>
