@@ -1,4 +1,4 @@
-// chain-utils.js - Solana chain interaction utilities
+// chain-utils.js - Solana network interaction utilities
 
 const { CHAINS } = require('./chain-config');
 
@@ -6,8 +6,8 @@ let _rpcRequestId = 0;
 
 /**
  * Send a JSON-RPC request to Solana.
- * @param {string} rpcUrl - The Solana RPC endpoint URL.
- * @param {string} method - The JSON-RPC method name.
+ * @param {string} rpcUrl - The RPC endpoint URL.
+ * @param {string} method - The JSON-RPC method name (e.g., 'getBalance', 'getSlot').
  * @param {Array} params - The parameters for the JSON-RPC method.
  * @returns {Promise<*>} - The result from the JSON-RPC response.
  */
@@ -29,70 +29,59 @@ async function rpcRequest(rpcUrl, method, params = []) {
 }
 
 /**
- * Get the RPC URL for a Solana network.
- * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
+ * Get the RPC URL for a Solana cluster defined in chain-config.js.
+ * @param {string} clusterName - The cluster name (e.g., 'mainnet', 'devnet', 'testnet').
  * @returns {string} - The RPC URL.
  */
-function getRpcUrl(networkName) {
-    const network = CHAINS[networkName];
-    if (!network) {
-        throw new Error(`Unknown Solana network: ${networkName}`);
+function getRpcUrl(clusterName) {
+    const chain = CHAINS[clusterName];
+    if (!chain) {
+        throw new Error(`Unknown cluster: ${clusterName}`);
     }
-    return network.rpcUrl;
+    return chain.rpcUrl;
 }
 
 /**
- * Get the SOL balance for a public key on Solana.
- * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
- * @param {string} publicKey - The Solana public key / address to query.
+ * Get the SOL balance for a wallet address on a given Solana cluster.
+ * @param {string} clusterName - The cluster name (e.g., 'mainnet', 'devnet', 'testnet').
+ * @param {string} address - The wallet address (base58 format) to query.
  * @returns {Promise<number>} - The balance in lamports.
  */
-async function getBalance(networkName, publicKey) {
-    const rpcUrl = getRpcUrl(networkName);
-    return rpcRequest(rpcUrl, 'getBalance', [publicKey]);
+async function getBalance(clusterName, address) {
+    const rpcUrl = getRpcUrl(clusterName);
+    return rpcRequest(rpcUrl, 'getBalance', [address]);
 }
 
 /**
- * Get the latest slot (block height) on Solana.
- * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
+ * Get the latest block number (slot) on a given Solana cluster.
+ * @param {string} clusterName - The cluster name (e.g., 'mainnet', 'devnet', 'testnet').
  * @returns {Promise<number>} - The latest slot number.
  */
-async function getLatestSlot(networkName) {
-    const rpcUrl = getRpcUrl(networkName);
+async function getBlockNumber(clusterName) {
+    const rpcUrl = getRpcUrl(clusterName);
     return rpcRequest(rpcUrl, 'getSlot', []);
 }
 
 /**
- * Get account info for a Solana public key.
- * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
- * @param {string} publicKey - The Solana public key to query.
- * @returns {Promise<object>} - The account information object.
- */
-async function getAccountInfo(networkName, publicKey) {
-    const rpcUrl = getRpcUrl(networkName);
-    return rpcRequest(rpcUrl, 'getAccountInfo', [publicKey, { encoding: 'base64' }]);
-}
-
-/**
- * Get transaction details by signature on Solana.
- * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
- * @param {string} signature - The transaction signature.
+ * Get transaction details by signature on a given Solana cluster.
+ * @param {string} clusterName - The cluster name (e.g., 'mainnet', 'devnet', 'testnet').
+ * @param {string} txSignature - The transaction signature.
  * @returns {Promise<object>} - The transaction object.
  */
-async function getTransaction(networkName, signature) {
-    const rpcUrl = getRpcUrl(networkName);
-    return rpcRequest(rpcUrl, 'getTransaction', [signature, { encoding: 'json' }]);
+async function getTransaction(clusterName, txSignature) {
+    const rpcUrl = getRpcUrl(clusterName);
+    return rpcRequest(rpcUrl, 'getTransaction', [txSignature, { encoding: 'json' }]);
 }
 
 /**
- * Get program accounts (all accounts owned by a program).
- * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
- * @param {string} programId - The program ID to query.
- * @returns {Promise<Array>} - Array of account objects.
+ * Get account information for a given address on a Solana cluster.
+ * @param {string} clusterName - The cluster name (e.g., 'mainnet', 'devnet', 'testnet').
+ * @param {string} address - The wallet address (base58 format).
+ * @returns {Promise<object>} - The account info object.
  */
-async function getProgramAccounts(networkName, programId) {
-    const rpcUrl = getRpcUrl(networkName);
-    return rpcRequest(rpcUrl, 'getProgramAccounts', [programId, { encoding: 'base64' }]);
+async function getAccountInfo(clusterName, address) {
+    const rpcUrl = getRpcUrl(clusterName);
+    return rpcRequest(rpcUrl, 'getAccountInfo', [address, { encoding: 'jsonParsed' }]);
 }
 
 /**
@@ -101,7 +90,7 @@ async function getProgramAccounts(networkName, programId) {
  * @returns {string} - The amount in SOL as a decimal string.
  */
 function lamportsToSol(lamports) {
-    const LAMPORTS_PER_SOL = 1000000000;
+    const LAMPORTS_PER_SOL = 1_000_000_000;
     const sol = lamports / LAMPORTS_PER_SOL;
     return sol.toString();
 }
@@ -112,18 +101,17 @@ function lamportsToSol(lamports) {
  * @returns {number} - The amount in lamports.
  */
 function solToLamports(sol) {
-    const LAMPORTS_PER_SOL = 1000000000;
-    return Math.round(sol * LAMPORTS_PER_SOL);
+    const LAMPORTS_PER_SOL = 1_000_000_000;
+    return Math.floor(sol * LAMPORTS_PER_SOL);
 }
 
 module.exports = {
     rpcRequest,
     getRpcUrl,
     getBalance,
-    getLatestSlot,
-    getAccountInfo,
+    getBlockNumber,
     getTransaction,
-    getProgramAccounts,
+    getAccountInfo,
     lamportsToSol,
     solToLamports,
 };
