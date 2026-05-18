@@ -1,40 +1,37 @@
-// chain-config.js - Supported chain network configurations
+// chain-config.js - Solana network configurations
 
 const CHAINS = {
-    base: {
-        chainId: 8453,
-        name: 'Base',
-        rpcUrl: 'https://mainnet.base.org',
-        wsUrl: 'wss://mainnet.base.org',
-        explorerUrl: 'https://basescan.org',
+    mainnet: {
+        name: 'Solana Mainnet',
+        rpcUrl: 'https://api.mainnet-beta.solana.com',
+        wsUrl: 'wss://api.mainnet-beta.solana.com',
+        explorerUrl: 'https://solscan.io',
         nativeCurrency: {
-            name: 'Ether',
-            symbol: 'ETH',
-            decimals: 18,
+            name: 'Solana',
+            symbol: 'SOL',
+            decimals: 9,
         },
     },
-    ink: {
-        chainId: 57073,
-        name: 'Ink',
-        rpcUrl: 'https://rpc-gel.inkonchain.com',
-        wsUrl: 'wss://ws-gel.inkonchain.com',
-        explorerUrl: 'https://explorer.inkonchain.com',
+    devnet: {
+        name: 'Solana Devnet',
+        rpcUrl: 'https://api.devnet.solana.com',
+        wsUrl: 'wss://api.devnet.solana.com',
+        explorerUrl: 'https://solscan.io?cluster=devnet',
         nativeCurrency: {
-            name: 'Ether',
-            symbol: 'ETH',
-            decimals: 18,
+            name: 'Solana',
+            symbol: 'SOL',
+            decimals: 9,
         },
     },
-    monad: {
-        chainId: 143,
-        name: 'Monad',
-        rpcUrl: 'https://rpc.monad.xyz',
-        wsUrl: 'wss://rpc.monad.xyz',
-        explorerUrl: 'https://monadvision.com',
+    testnet: {
+        name: 'Solana Testnet',
+        rpcUrl: 'https://api.testnet.solana.com',
+        wsUrl: 'wss://api.testnet.solana.com',
+        explorerUrl: 'https://solscan.io?cluster=testnet',
         nativeCurrency: {
-            name: 'Monad',
-            symbol: 'MON',
-            decimals: 18,
+            name: 'Solana',
+            symbol: 'SOL',
+            decimals: 9,
         },
     },
 };
