@@ -1,16 +1,19 @@
+// crypto-utils/chain-utils.js - Solana interaction utilities
+
 const RPC_URLS = {
-  ink: 'https://rpc-gel-sepolia.inkonchain.com', // Example Ink endpoint
-  base: 'https://mainnet.base.org'
+  mainnet: 'https://api.mainnet-beta.solana.com',
+  devnet: 'https://api.devnet.solana.com',
+  testnet: 'https://api.testnet.solana.com',
 };
 
-async function getBalance(chain, address) {
-  const response = await fetch(RPC_URLS[chain], {
+async function getBalance(network, address) {
+  const response = await fetch(RPC_URLS[network], {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       jsonrpc: '2.0',
-      method: 'eth_getBalance',
-      params: [address, 'latest'],
+      method: 'getBalance',
+      params: [address],
       id: 1
     })
   });
@@ -18,13 +21,13 @@ async function getBalance(chain, address) {
   return data.result;
 }
 
-async function getBlockNumber(chain) {
-  const response = await fetch(RPC_URLS[chain], {
+async function getBlockNumber(network) {
+  const response = await fetch(RPC_URLS[network], {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       jsonrpc: '2.0',
-      method: 'eth_blockNumber',
+      method: 'getSlot',
       params: [],
       id: 1
     })
@@ -33,9 +36,9 @@ async function getBlockNumber(chain) {
   return data.result;
 }
 
-function hexWeiToEth(hex) {
-  const wei = BigInt(hex);
-  return Number(wei) / 1e18; // Simple conversion
+function lamportsToSol(lamports) {
+  const LAMPORTS_PER_SOL = 1_000_000_000;
+  return (lamports / LAMPORTS_PER_SOL).toString();
 }
 
-module.exports = { getBalance, getBlockNumber, hexWeiToEth };
+module.exports = { getBalance, getBlockNumber, lamportsToSol };
