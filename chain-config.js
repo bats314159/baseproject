@@ -25,6 +25,18 @@ const CHAINS = {
             decimals: 18,
         },
     },
+    monad: {
+        chainId: 143,
+        name: 'Monad',
+        rpcUrl: 'https://rpc.monad.xyz',
+        wsUrl: 'wss://rpc.monad.xyz',
+        explorerUrl: 'https://monadvision.com',
+        nativeCurrency: {
+            name: 'Monad',
+            symbol: 'MON',
+            decimals: 18,
+        },
+    },
 };
 
 module.exports = { CHAINS };
