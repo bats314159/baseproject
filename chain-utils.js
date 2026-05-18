@@ -1,12 +1,12 @@
-// chain-utils.js - EVM chain interaction utilities
+// chain-utils.js - Solana chain interaction utilities
 
 const { CHAINS } = require('./chain-config');
 
 let _rpcRequestId = 0;
 
 /**
- * Send a JSON-RPC request to an EVM chain.
- * @param {string} rpcUrl - The RPC endpoint URL.
+ * Send a JSON-RPC request to Solana.
+ * @param {string} rpcUrl - The Solana RPC endpoint URL.
  * @param {string} method - The JSON-RPC method name.
  * @param {Array} params - The parameters for the JSON-RPC method.
  * @returns {Promise<*>} - The result from the JSON-RPC response.
@@ -29,98 +29,101 @@ async function rpcRequest(rpcUrl, method, params = []) {
 }
 
 /**
- * Get the chain ID from a chain name defined in chain-config.js.
- * @param {string} chainName - The chain name (e.g. 'base', 'ink').
- * @returns {number} - The chain ID.
- */
-function getChainId(chainName) {
-    const chain = CHAINS[chainName];
-    if (!chain) {
-        throw new Error(`Unknown chain: ${chainName}`);
-    }
-    return chain.chainId;
-}
-
-/**
- * Get the RPC URL for a chain defined in chain-config.js.
- * @param {string} chainName - The chain name (e.g. 'base', 'ink').
+ * Get the RPC URL for a Solana network.
+ * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
  * @returns {string} - The RPC URL.
  */
-function getRpcUrl(chainName) {
-    const chain = CHAINS[chainName];
-    if (!chain) {
-        throw new Error(`Unknown chain: ${chainName}`);
+function getRpcUrl(networkName) {
+    const network = CHAINS[networkName];
+    if (!network) {
+        throw new Error(`Unknown Solana network: ${networkName}`);
     }
-    return chain.rpcUrl;
+    return network.rpcUrl;
 }
 
 /**
- * Get the ETH balance for an address on a given chain.
- * @param {string} chainName - The chain name (e.g. 'base', 'ink').
- * @param {string} address - The wallet address to query.
- * @returns {Promise<string>} - The balance in wei as a hex string.
+ * Get the SOL balance for a public key on Solana.
+ * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
+ * @param {string} publicKey - The Solana public key / address to query.
+ * @returns {Promise<number>} - The balance in lamports.
  */
-async function getBalance(chainName, address) {
-    const rpcUrl = getRpcUrl(chainName);
-    return rpcRequest(rpcUrl, 'eth_getBalance', [address, 'latest']);
+async function getBalance(networkName, publicKey) {
+    const rpcUrl = getRpcUrl(networkName);
+    return rpcRequest(rpcUrl, 'getBalance', [publicKey]);
 }
 
 /**
- * Get the latest block number on a given chain.
- * @param {string} chainName - The chain name (e.g. 'base', 'ink').
- * @returns {Promise<string>} - The block number as a hex string.
+ * Get the latest slot (block height) on Solana.
+ * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
+ * @returns {Promise<number>} - The latest slot number.
  */
-async function getBlockNumber(chainName) {
-    const rpcUrl = getRpcUrl(chainName);
-    return rpcRequest(rpcUrl, 'eth_blockNumber', []);
+async function getLatestSlot(networkName) {
+    const rpcUrl = getRpcUrl(networkName);
+    return rpcRequest(rpcUrl, 'getSlot', []);
 }
 
 /**
- * Get transaction details by hash on a given chain.
- * @param {string} chainName - The chain name (e.g. 'base', 'ink').
- * @param {string} txHash - The transaction hash.
+ * Get account info for a Solana public key.
+ * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
+ * @param {string} publicKey - The Solana public key to query.
+ * @returns {Promise<object>} - The account information object.
+ */
+async function getAccountInfo(networkName, publicKey) {
+    const rpcUrl = getRpcUrl(networkName);
+    return rpcRequest(rpcUrl, 'getAccountInfo', [publicKey, { encoding: 'base64' }]);
+}
+
+/**
+ * Get transaction details by signature on Solana.
+ * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
+ * @param {string} signature - The transaction signature.
  * @returns {Promise<object>} - The transaction object.
  */
-async function getTransaction(chainName, txHash) {
-    const rpcUrl = getRpcUrl(chainName);
-    return rpcRequest(rpcUrl, 'eth_getTransactionByHash', [txHash]);
+async function getTransaction(networkName, signature) {
+    const rpcUrl = getRpcUrl(networkName);
+    return rpcRequest(rpcUrl, 'getTransaction', [signature, { encoding: 'json' }]);
 }
 
 /**
- * Get the transaction receipt for a given transaction hash on a given chain.
- * @param {string} chainName - The chain name (e.g. 'base', 'ink').
- * @param {string} txHash - The transaction hash.
- * @returns {Promise<object>} - The transaction receipt object.
+ * Get program accounts (all accounts owned by a program).
+ * @param {string} networkName - The network name ('mainnet', 'devnet', 'testnet').
+ * @param {string} programId - The program ID to query.
+ * @returns {Promise<Array>} - Array of account objects.
  */
-async function getTransactionReceipt(chainName, txHash) {
-    const rpcUrl = getRpcUrl(chainName);
-    return rpcRequest(rpcUrl, 'eth_getTransactionReceipt', [txHash]);
+async function getProgramAccounts(networkName, programId) {
+    const rpcUrl = getRpcUrl(networkName);
+    return rpcRequest(rpcUrl, 'getProgramAccounts', [programId, { encoding: 'base64' }]);
 }
 
 /**
- * Convert a hex wei value to a human-readable ETH string.
- * @param {string} hexWei - The balance in hex wei (e.g. '0x1a2b3c').
- * @returns {string} - The balance in ETH as a decimal string.
+ * Convert lamports to SOL.
+ * @param {number} lamports - The amount in lamports.
+ * @returns {string} - The amount in SOL as a decimal string.
  */
-function hexWeiToEth(hexWei) {
-    const WEI_PER_ETH = BigInt('1000000000000000000');
-    const wei = BigInt(hexWei);
-    const integerPart = wei / WEI_PER_ETH;
-    const remainder = wei % WEI_PER_ETH;
-    if (remainder === 0n) {
-        return integerPart.toString();
-    }
-    const decimalPart = remainder.toString().padStart(18, '0').replace(/0+$/, '');
-    return `${integerPart}.${decimalPart}`;
+function lamportsToSol(lamports) {
+    const LAMPORTS_PER_SOL = 1000000000;
+    const sol = lamports / LAMPORTS_PER_SOL;
+    return sol.toString();
+}
+
+/**
+ * Convert SOL to lamports.
+ * @param {number} sol - The amount in SOL.
+ * @returns {number} - The amount in lamports.
+ */
+function solToLamports(sol) {
+    const LAMPORTS_PER_SOL = 1000000000;
+    return Math.round(sol * LAMPORTS_PER_SOL);
 }
 
 module.exports = {
     rpcRequest,
-    getChainId,
     getRpcUrl,
     getBalance,
-    getBlockNumber,
+    getLatestSlot,
+    getAccountInfo,
     getTransaction,
-    getTransactionReceipt,
-    hexWeiToEth,
+    getProgramAccounts,
+    lamportsToSol,
+    solToLamports,
 };
